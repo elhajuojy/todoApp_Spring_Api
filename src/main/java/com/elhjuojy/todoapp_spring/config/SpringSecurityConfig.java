@@ -16,17 +16,22 @@ public class SpringSecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         System.out.println("Enable my Custom Configuration 🦆");
 
+        http.csrf().disable();
+        http.headers().frameOptions().disable();
         http.authorizeHttpRequests(
-
-        ).anyRequest().authenticated();
+                (req)->req.requestMatchers("/login/**","/register/").anonymous()
+                        .requestMatchers("/api/**").authenticated()
+        );
         http.formLogin();
         return http.build();
     }
 
-    @Bean
-    public WebSecurityCustomizer webSecurityCustomizer() {
-        System.out.println("Custom webSecurityCustomizer 😍");
-        //ignore any request that start with /api/**
-        return (web) -> web.ignoring().requestMatchers("/api/**");
-    }
+//    @Bean
+//    public WebSecurityCustomizer webSecurityCustomizer() {
+//        System.out.println("Custom webSecurityCustomizer 😍");
+//        //ignore any request that start with /api/**
+//        return (web) -> web.ignoring().requestMatchers("/api/**");
+//    }
+
+
 }
