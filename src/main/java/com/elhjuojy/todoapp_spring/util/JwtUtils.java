@@ -16,7 +16,8 @@ import java.util.function.Function;
 @Service
 public class JwtUtils {
 
-    private static final int expireInMs = 60 * 1000;
+    //1hr:40 min
+    private static final int expireInMs = 60 * 100000;
     private final static Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
 
     public String generateToken(UserDetails userDetails) {
