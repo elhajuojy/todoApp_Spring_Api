@@ -6,6 +6,7 @@ import com.elhjuojy.todoapp_spring.services.UserService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.crossstore.ChangeSetPersister;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
@@ -15,12 +16,21 @@ import java.util.Collection;
 public class UserServiceImpl implements UserService {
 
 
-    @Autowired
-    private  UserRepository userRepository;
 
+    private final UserRepository userRepository;
+
+    private PasswordEncoder passwordEncoder;
+
+    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     @Override
     public User save(User user) {
+
+        String pw = user.getPassword();
+        user.setPassword(passwordEncoder.encode(pw));
         return this.userRepository.save(user);
     }
 
