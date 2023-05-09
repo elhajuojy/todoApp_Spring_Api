@@ -23,9 +23,12 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -44,15 +47,16 @@ public class SpringSecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http , AuthenticationProvider authenticationProvider) throws Exception {
         System.out.println("Enable my Custom Configuration 🦆");
 
-        http.csrf().disable().cors();
-        http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+        http.cors();
+        http.csrf().disable();
         http.headers().frameOptions().disable();
         http.authorizeHttpRequests((requests) ->
                 requests.requestMatchers("/auth/login").anonymous()
                         .requestMatchers("/auth/logged").permitAll()
                         .anyRequest().authenticated());
-        http.authenticationProvider(authenticationProvider);
-        http.addFilterBefore(jwtRequestFilter,UsernamePasswordAuthenticationFilter.class);
+        http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authenticationProvider(authenticationProvider)
+                .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);;
         return http.build();
     }
 
@@ -63,6 +67,18 @@ public class SpringSecurityConfig {
         provider.setUserDetailsService(userDetailsService);
         provider.setPasswordEncoder(passwordEncoder);
         return provider;
+    }
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        return request -> {
+            CorsConfiguration config = new CorsConfiguration();
+            config.setAllowedOrigins(List.of("http://localhost:3000"));
+            config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE"));
+            config.setAllowedHeaders(List.of("Content-Type", "Authorization"));
+            config.setExposedHeaders(List.of("Authorization"));
+            config.setAllowCredentials(true);
+            return config;
+        };
     }
 
     @Bean
@@ -76,10 +92,14 @@ public class SpringSecurityConfig {
             User user = userRepository.findByEmail(email);
             Collection<GrantedAuthority> authorities = new ArrayList<>();
 
-            user.getRoles().forEach((role)->{
-                authorities.add(new SimpleGrantedAuthority(role.getRoleName().label));
-            });
-            return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPassword(), authorities);
+           if (user !=null){
+               user.getRoles().forEach((role)->{
+                   authorities.add(new SimpleGrantedAuthority(role.getRoleName().label));
+               });
+                return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPassword(), authorities);
+           }
+           return null;
+
         };
     }
 

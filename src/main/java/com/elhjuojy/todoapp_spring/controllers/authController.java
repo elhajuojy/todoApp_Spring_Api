@@ -6,6 +6,7 @@ import com.elhjuojy.todoapp_spring.dto.UserCredentials;
 import com.elhjuojy.todoapp_spring.model.User;
 import com.elhjuojy.todoapp_spring.repository.UserRepository;
 import com.elhjuojy.todoapp_spring.util.JwtUtils;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -46,13 +47,25 @@ public class authController {
             Authentication authentication = authenticationManager.authenticate(authenticationToken);
             if (authentication.isAuthenticated()) {
                 User user = userRepository.findByEmail(userCredentials.email());
-                String accessToken = jwtUtils.generate(String.valueOf(userDetailsService.loadUserByUsername(userCredentials.email())));
+                String accessToken = jwtUtils.generateToken(userDetailsService.loadUserByUsername(userCredentials.email()));
                 return ResponseEntity.ok(new LoginResponse(accessToken, user.getUsername(), user.getEmail(), user.getRoles()));
             }
         } catch (BadCredentialsException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new LoginError("Invalid email or password", HttpStatus.UNAUTHORIZED));
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new LoginError("Invalid email or password", HttpStatus.UNAUTHORIZED));
+    }
+
+    @GetMapping("/auth/logged")
+    public ResponseEntity<String> logged(HttpServletRequest request) {
+        String token = request.getHeader("Authorization");
+        System.out.println(token);
+        if (token != null && token.startsWith("Bearer ")) {
+            token = token.substring(7);
+            String username = jwtUtils.getUsername(token);
+            return ResponseEntity.ok().body("Logged in with : " + username + " using token: " + token);
+        }
+        return ResponseEntity.ok("Not logged");
     }
 
 }
