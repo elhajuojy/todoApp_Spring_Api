@@ -13,4 +13,5 @@ public interface RoleService {
     void delete(Long id);
     Collection<Role> getAll();
     Role loadByRoleName(RoleEnum roleName);
+    public void addRoleToUser(String email , RoleEnum roleName);
 }

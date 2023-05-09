@@ -4,9 +4,7 @@ import com.elhjuojy.todoapp_spring.enums.RoleEnum;
 import com.elhjuojy.todoapp_spring.model.Role;
 import com.elhjuojy.todoapp_spring.model.User;
 import com.elhjuojy.todoapp_spring.repository.RoleRepository;
-import com.elhjuojy.todoapp_spring.repository.UserRepository;
 import com.elhjuojy.todoapp_spring.services.RoleService;
-import com.elhjuojy.todoapp_spring.services.UserService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,7 +16,13 @@ import java.util.Collection;
 public class RoleServiceImpl implements RoleService {
 
 
-    private RoleRepository roleRepository;
+    private final RoleRepository roleRepository;
+    private final UserServiceImpl userService;
+
+    public RoleServiceImpl(RoleRepository roleRepository, UserServiceImpl userService) {
+        this.roleRepository = roleRepository;
+        this.userService = userService;
+    }
 
     @Override
     public Role save(Role role) {
@@ -44,5 +48,13 @@ public class RoleServiceImpl implements RoleService {
     @Override
     public Role loadByRoleName(RoleEnum roleName) {
         return this.roleRepository.findByRoleName(roleName);
+    }
+
+    @Override
+    public void addRoleToUser(String email, RoleEnum roleName) {
+            User user = this.userService.loadByUserEmail(email);
+            Role role = loadByRoleName(roleName);
+            user.getRoles().add(role);
+
     }
 }
