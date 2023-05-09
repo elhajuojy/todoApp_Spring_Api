@@ -26,6 +26,8 @@ public class User {
     private String email ;
     private String username;
 
+    //access to password property only on writing to avoid user getting his password
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 
     @ManyToMany(fetch = FetchType.EAGER )

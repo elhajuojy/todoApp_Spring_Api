@@ -3,10 +3,9 @@ package com.elhjuojy.todoapp_spring.controllers;
 
 import com.elhjuojy.todoapp_spring.model.User;
 import com.elhjuojy.todoapp_spring.services.impl.UserServiceImpl;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Collection;
 
@@ -23,6 +22,11 @@ public class userController {
     @GetMapping
     public Collection<User> index(){
         return  this.userService.getAll();
+    }
+
+    @PostMapping
+    public ResponseEntity<User> save(@RequestBody User user){
+        return new ResponseEntity<>(userService.save(user), HttpStatus.OK);
     }
 
     @PostMapping("/addRole")

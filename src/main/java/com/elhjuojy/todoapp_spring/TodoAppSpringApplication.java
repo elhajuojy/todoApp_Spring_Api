@@ -61,8 +61,5 @@ public class TodoAppSpringApplication {
 	}
 
 
-	@Bean
-	PasswordEncoder passwordEncoder(){
-		return new BCryptPasswordEncoder();
-	}
+
 }
